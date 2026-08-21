@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NspxOS</title>
+<link rel="stylesheet" href="css/os.css">
+</head>
+<body>
+  <div id="desktop">
+    <div id="icons"></div>
+    <div id="taskbar">
+      <button id="start">Iniciar</button>
+      <div id="tasks"></div>
+      <div id="clock"></div>
+    </div>
+    <div id="start-menu" class="hidden"></div>
+    <div id="notifications"></div>
+  </div>
+
+  <!-- o núcleo primeiro, depois as janelas, depois os programas -->
+  <script src="js/kernel.js"></script>
+  <script src="js/wm.js"></script>
+  <script src="js/apps/notas.js"></script>
+  <script src="js/apps/calc.js"></script>
+  <script src="js/apps/arquivos.js"></script>
+  <script src="js/apps/navegador.js"></script>
+  <script src="js/apps/terminal.js"></script>
+  <script>
+    // O kernel sobe depois que todos os programas se registraram.
+    window.addEventListener('DOMContentLoaded', () => OS.boot());
+  </script>
+</body>
+</html>
