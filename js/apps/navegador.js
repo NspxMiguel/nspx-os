@@ -26,6 +26,27 @@ OS.registerApp({
           background: #2a2a2a;
           border-bottom: 1px solid #444;
           flex-shrink: 0;
+          align-items: center;
+        }
+
+        .nav-spacer {
+          flex: 1;
+        }
+
+        .nav-open-external-btn {
+          background: transparent;
+          border: 1px solid #666;
+          color: #999;
+          padding: 4px 8px;
+          border-radius: 3px;
+          cursor: pointer;
+          font-size: 12px;
+          transition: all 0.2s;
+        }
+
+        .nav-open-external-btn:hover {
+          border-color: #0066cc;
+          color: #0066cc;
         }
 
         .nav-btn {
@@ -221,6 +242,8 @@ OS.registerApp({
           <button class="nav-btn nav-reload" title="Recarregar">⟳</button>
           <input class="nav-address" type="text" placeholder="Digite uma URL ou faça uma busca">
           <button class="nav-search-btn">Buscar</button>
+          <div class="nav-spacer"></div>
+          <button class="nav-open-external-btn nav-toolbar-open-external" title="Abrir em nova aba">Abrir em nova aba</button>
         </div>
         <div class="nav-content">
           <div class="nav-home">
@@ -265,6 +288,7 @@ OS.registerApp({
     const iframe = body.querySelector('.nav-iframe');
     const divErro = body.querySelector('.nav-error');
     const btnAbrirAba = body.querySelector('.nav-open-external');
+    const btnAbrirAbaToolbar = body.querySelector('.nav-toolbar-open-external');
     const inputBuscaHome = body.querySelector('.nav-search-input');
     const btnBuscaHome = body.querySelector('.nav-home-search-btn');
 
@@ -285,33 +309,34 @@ OS.registerApp({
 
       iframe.src = '';
 
+      let loadTimeout;
+      const clearLoadTimeout = () => {
+        if (loadTimeout) clearTimeout(loadTimeout);
+      };
+
+      const handleLoadSuccess = () => {
+        clearLoadTimeout();
+        iframe.removeEventListener('error', handleLoadError);
+      };
+
+      const handleLoadError = () => {
+        clearLoadTimeout();
+        iframe.removeEventListener('load', handleLoadSuccess);
+        mostrarErro();
+      };
+
+      loadTimeout = setTimeout(() => {
+        iframe.removeEventListener('load', handleLoadSuccess);
+        iframe.removeEventListener('error', handleLoadError);
+        mostrarErro();
+      }, 8000);
+
+      iframe.addEventListener('load', handleLoadSuccess, { once: true });
+      iframe.addEventListener('error', handleLoadError, { once: true });
+
       setTimeout(() => {
         iframe.src = url;
       }, 50);
-
-      setTimeout(() => {
-        try {
-          const doc = iframe.contentDocument || iframe.contentWindow.document;
-        } catch (e) {
-          if (e.name === 'SecurityError') {
-            mostrarErro();
-          }
-        }
-      }, 2000);
-
-      iframe.addEventListener('load', () => {
-        try {
-          iframe.contentDocument;
-        } catch (e) {
-          if (e.name === 'SecurityError') {
-            mostrarErro();
-          }
-        }
-      }, { once: true });
-
-      iframe.addEventListener('error', () => {
-        mostrarErro();
-      }, { once: true });
     };
 
     const mostrarErro = () => {
@@ -321,6 +346,14 @@ OS.registerApp({
         window.open(urlAtual, '_blank');
       };
     };
+
+    const abrirEmNovaAba = () => {
+      if (urlAtual) {
+        window.open(urlAtual, '_blank');
+      }
+    };
+
+    btnAbrirAbaToolbar.addEventListener('click', abrirEmNovaAba);
 
     const procesarEntrada = (entrada) => {
       entrada = entrada.trim();
