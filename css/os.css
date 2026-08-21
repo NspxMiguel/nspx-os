@@ -1,0 +1,559 @@
+/* ==========================================================================
+   NspxOS - Estilos Principais do Sistema Operacional
+   Visual moderno, escuro, com cantos arredondados e transições suaves.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Reset & Variáveis Globais
+   -------------------------------------------------------------------------- */
+:root {
+  --bg-gradient: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.18), transparent 45%),
+                 radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.18), transparent 45%),
+                 linear-gradient(135deg, #090d16 0%, #111827 40%, #1e1b4b 70%, #0f172a 100%);
+  
+  --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-accent: #38bdf8;
+  --color-accent-hover: #0284c7;
+  --color-danger: #ef4444;
+  
+  --glass-bg: rgba(30, 41, 59, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  
+  --taskbar-bg: rgba(15, 23, 42, 0.85);
+  --taskbar-height: 48px;
+  
+  --win-bg: rgba(30, 41, 59, 0.92);
+  --win-titlebar-bg: rgba(15, 23, 42, 0.8);
+  --win-titlebar-focused: rgba(15, 23, 42, 0.95);
+  
+  --radius-window: 12px;
+  --radius-btn: 8px;
+  
+  --shadow-window: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-window-focused: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(56, 189, 248, 0.4), 0 0 20px rgba(56, 189, 248, 0.15);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-family);
+  background: #090d16;
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* --------------------------------------------------------------------------
+   2. Área de Trabalho (#desktop)
+   -------------------------------------------------------------------------- */
+#desktop {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  background-size: cover;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* --------------------------------------------------------------------------
+   3. Ícones da Área de Trabalho (#icons e .desktop-icon)
+   -------------------------------------------------------------------------- */
+#icons {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 16px;
+  max-height: calc(100vh - var(--taskbar-height) - 32px);
+  z-index: 1;
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 86px;
+  padding: 10px 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--color-text);
+  cursor: pointer;
+  outline: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.desktop-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transform: translateY(-2px);
+}
+
+.desktop-icon:active,
+.desktop-icon:focus {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: rgba(56, 189, 248, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.desktop-icon .icon {
+  font-size: 36px;
+  margin-bottom: 6px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+
+.desktop-icon .label {
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  word-break: break-word;
+  line-height: 1.2;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* --------------------------------------------------------------------------
+   4. Janelas (.window) e seus Estados (.focused, .minimized, .maximized)
+   -------------------------------------------------------------------------- */
+.window {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--win-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: var(--radius-window);
+  box-shadow: var(--shadow-window);
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+  z-index: 10;
+  min-width: 240px;
+  min-height: 140px;
+  transition: box-shadow 0.25s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Janela Focada */
+.window.focused {
+  z-index: 20;
+  box-shadow: var(--shadow-window-focused);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+/* Janela Minimizada */
+.window.minimized {
+  display: none !important;
+}
+
+/* Janela Maximizada */
+.window.maximized {
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: calc(100% - var(--taskbar-height)) !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Barra de Título (.win-titlebar) */
+.win-titlebar {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 12px;
+  background: var(--win-titlebar-bg);
+  border-bottom: 1px solid var(--glass-border);
+  user-select: none;
+  cursor: move;
+  transition: background 0.2s ease;
+}
+
+.window.focused .win-titlebar {
+  background: var(--win-titlebar-focused);
+}
+
+.win-icon {
+  font-size: 16px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.win-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Botões da Janela (.win-buttons) */
+.win-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.win-buttons button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.win-buttons button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.win-buttons button:active {
+  transform: scale(0.92);
+}
+
+.win-buttons .win-close:hover {
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+/* Corpo da Janela (.win-body) */
+.win-body {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+  color: var(--color-text);
+  position: relative;
+  background: rgba(15, 23, 42, 0.4);
+}
+
+/* Canto de Redimensionar (.win-resize) */
+.win-resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 16px;
+  height: 16px;
+  cursor: se-resize;
+  z-index: 5;
+}
+
+.win-resize::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid var(--color-text-muted);
+  border-bottom: 2px solid var(--color-text-muted);
+  opacity: 0.5;
+}
+
+/* --------------------------------------------------------------------------
+   5. Barra de Tarefas (#taskbar)
+   -------------------------------------------------------------------------- */
+#taskbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--taskbar-height);
+  background: var(--taskbar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 12px;
+  z-index: 1000;
+  user-select: none;
+}
+
+/* Botão Iniciar (#start) */
+#start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--color-accent), #0284c7);
+  border: none;
+  border-radius: var(--radius-btn);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(56, 189, 248, 0.3);
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+#start:hover {
+  background: linear-gradient(135deg, #7dd3fc, #0369a1);
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.45);
+  transform: translateY(-1px);
+}
+
+#start:active {
+  transform: translateY(0);
+}
+
+/* Área de Apps Aberto (#tasks e .task) */
+#tasks {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 100%;
+
+  /* Esconder barra de rolagem */
+  scrollbar-width: none;
+}
+
+#tasks::-webkit-scrollbar {
+  display: none;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 34px;
+  max-width: 180px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-btn);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.task:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color-text);
+}
+
+.task.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: var(--color-accent);
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+/* Relógio (#clock) */
+#clock {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+}
+
+/* --------------------------------------------------------------------------
+   6. Menu Iniciar (#start-menu, .hidden, .start-item)
+   -------------------------------------------------------------------------- */
+#start-menu {
+  position: absolute;
+  bottom: calc(var(--taskbar-height) + 8px);
+  left: 12px;
+  width: 260px;
+  max-height: 380px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-window);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 999;
+  overflow-y: auto;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#start-menu.hidden {
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  display: none !important;
+}
+
+.start-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.start-item:hover {
+  background: rgba(56, 189, 248, 0.18);
+  color: var(--color-accent);
+}
+
+/* --------------------------------------------------------------------------
+   7. Notificações (#notifications, .notification)
+   -------------------------------------------------------------------------- */
+#notifications {
+  position: absolute;
+  bottom: calc(var(--taskbar-height) + 12px);
+  right: 16px;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  z-index: 2000;
+  pointer-events: none;
+  max-width: 320px;
+  width: 100%;
+}
+
+.notification {
+  pointer-events: auto;
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-left: 4px solid var(--color-accent);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  animation: notificationSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes notificationSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   8. Estilização Padrão para Elementos Internos dos Apps (.win-body)
+   -------------------------------------------------------------------------- */
+.win-body input[type="text"],
+.win-body input[type="number"],
+.win-body input[type="password"],
+.win-body input[type="search"],
+.win-body input[type="url"],
+.win-body textarea,
+.win-body select {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.win-body input:focus,
+.win-body textarea:focus,
+.win-body select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25);
+}
+
+.win-body button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.win-body button:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.win-body button:active {
+  transform: scale(0.97);
+}
+
+/* Barra de rolagem personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.32);
+}

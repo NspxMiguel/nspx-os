@@ -17,6 +17,8 @@ quadro (`team note`) em vez de inventar.
 | `css/os.css` | todo o visual |
 | `js/apps/notas.js`, `js/apps/calc.js`, `js/apps/arquivos.js` | apps simples |
 | `js/apps/navegador.js`, `js/apps/terminal.js` | navegador e terminal |
+| `js/apps/config.js` | ajustes do sistema |
+| `js/apps/campominado.js` | jogo |
 
 Cada um mexe **só nos seus arquivos**. O `index.html` já carrega todos eles.
 
