@@ -28,9 +28,7 @@
   <script src="js/apps/terminal.js"></script>
   <script src="js/apps/config.js"></script>
   <script src="js/apps/campominado.js"></script>
-  <script>
-    // O kernel sobe depois que todos os programas se registraram.
-    window.addEventListener('DOMContentLoaded', () => OS.boot());
-  </script>
+  <!-- O kernel sobe sozinho no DOMContentLoaded, depois que todos os
+       programas acima se registraram. -->
 </body>
 </html>
