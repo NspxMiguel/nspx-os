@@ -285,13 +285,17 @@ OS.registerApp({
     const btnBuscarToolbar = body.querySelector('.nav-search-btn');
     const divHome = body.querySelector('.nav-home');
     const iframeContainer = body.querySelector('.nav-iframe-container');
-    const iframe = body.querySelector('.nav-iframe');
+    let iframe = body.querySelector('.nav-iframe');
     const divErro = body.querySelector('.nav-error');
     const btnAbrirAba = body.querySelector('.nav-open-external');
     const btnAbrirAbaToolbar = body.querySelector('.nav-toolbar-open-external');
     const inputBuscaHome = body.querySelector('.nav-search-input');
     const btnBuscaHome = body.querySelector('.nav-home-search-btn');
 
+    // Trocar o src do iframe existente dá dor de cabeça: `src = ''` recarrega a
+    // própria página do OS, e o evento `load` dessa recarga se mistura com o do
+    // site que a gente quer. Cada navegação ganha um iframe novo, com os
+    // ouvintes ligados antes de existir qualquer src.
     const carregarURL = (url) => {
       if (!url.trim()) {
         divHome.classList.remove('hidden');
@@ -307,36 +311,37 @@ OS.registerApp({
       urlAtual = url;
       inputEndereco.value = url;
 
-      iframe.src = '';
+      const novoIframe = document.createElement('iframe');
+      novoIframe.className = iframe.className;
+      novoIframe.setAttribute('sandbox',
+        'allow-scripts allow-same-origin allow-forms allow-popups');
 
-      let loadTimeout;
-      const clearLoadTimeout = () => {
-        if (loadTimeout) clearTimeout(loadTimeout);
-      };
-
-      const handleLoadSuccess = () => {
-        clearLoadTimeout();
-        iframe.removeEventListener('error', handleLoadError);
-      };
-
-      const handleLoadError = () => {
-        clearLoadTimeout();
-        iframe.removeEventListener('load', handleLoadSuccess);
-        mostrarErro();
-      };
-
-      loadTimeout = setTimeout(() => {
-        iframe.removeEventListener('load', handleLoadSuccess);
-        iframe.removeEventListener('error', handleLoadError);
+      // Não dá para ler o conteúdo de outra origem — tentar isso só levanta um
+      // SecurityError que acontece igual quando a página carregou bem. O único
+      // sinal honesto é o `load` não chegar.
+      let decidido = false;
+      const prazo = setTimeout(() => {
+        if (decidido) return;
+        decidido = true;
         mostrarErro();
       }, 8000);
 
-      iframe.addEventListener('load', handleLoadSuccess, { once: true });
-      iframe.addEventListener('error', handleLoadError, { once: true });
+      novoIframe.addEventListener('load', () => {
+        if (decidido) return;
+        decidido = true;
+        clearTimeout(prazo);
+      }, { once: true });
 
-      setTimeout(() => {
-        iframe.src = url;
-      }, 50);
+      novoIframe.addEventListener('error', () => {
+        if (decidido) return;
+        decidido = true;
+        clearTimeout(prazo);
+        mostrarErro();
+      }, { once: true });
+
+      iframe.replaceWith(novoIframe);
+      iframe = novoIframe;
+      novoIframe.src = url;
     };
 
     const mostrarErro = () => {
