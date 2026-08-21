@@ -10,6 +10,7 @@ OS.registerApp({
     let indiceHistorico = historico.length - 1;
     let urlAtual = '';
     let termoAtual = '';
+    let buscadorSelecionado = OS.settings.get('navegador.buscador', 'google');
 
     body.innerHTML = `
       <style scoped>
@@ -32,6 +33,33 @@ OS.registerApp({
 
         .nav-spacer {
           flex: 1;
+        }
+
+        .nav-search-selector {
+          display: flex;
+          gap: 4px;
+          align-items: center;
+        }
+
+        .nav-search-selector-btn {
+          background: transparent;
+          border: 1px solid #666;
+          color: #999;
+          padding: 4px 8px;
+          border-radius: 3px;
+          cursor: pointer;
+          font-size: 12px;
+          transition: all 0.2s;
+        }
+
+        .nav-search-selector-btn:hover {
+          border-color: #999;
+        }
+
+        .nav-search-selector-btn.active {
+          background: #0066cc;
+          border-color: #0066cc;
+          color: #fff;
         }
 
         .nav-open-external-btn {
@@ -251,7 +279,10 @@ OS.registerApp({
           <input class="nav-address" type="text" placeholder="Digite uma URL ou faça uma busca">
           <button class="nav-search-btn">Buscar</button>
           <div class="nav-spacer"></div>
-          <button class="nav-open-external-btn nav-toolbar-google" title="Buscar no Google em nova aba">Google</button>
+          <div class="nav-search-selector">
+            <button class="nav-search-selector-btn nav-search-selector-google" title="Buscar com Google">Google</button>
+            <button class="nav-search-selector-btn nav-search-selector-bing" title="Buscar com Bing">Bing</button>
+          </div>
           <button class="nav-open-external-btn nav-toolbar-open-external" title="Abrir em nova aba">Abrir em nova aba</button>
         </div>
         <div class="nav-content">
@@ -261,7 +292,7 @@ OS.registerApp({
               <input class="nav-search-input" type="text" placeholder="Pesquise na web...">
               <button class="nav-home-search-btn">Buscar</button>
             </div>
-            <p class="nav-help-text">Busca dentro da janela usa Bing. Use o botão Google para buscar no Google.</p>
+            <p class="nav-help-text">Se a busca aparecer em branco, troque para o Bing ali em cima.</p>
             <div class="nav-shortcuts">
               <a class="nav-shortcut" href="https://www.google.com">
                 <span class="icon">🔍</span><span class="label">Google</span>
@@ -299,9 +330,20 @@ OS.registerApp({
     const divErro = body.querySelector('.nav-error');
     const btnAbrirAba = body.querySelector('.nav-open-external');
     const btnAbrirAbaToolbar = body.querySelector('.nav-toolbar-open-external');
-    const btnGoogleToolbar = body.querySelector('.nav-toolbar-google');
     const inputBuscaHome = body.querySelector('.nav-search-input');
     const btnBuscaHome = body.querySelector('.nav-home-search-btn');
+    const btnSeletorGoogle = body.querySelector('.nav-search-selector-google');
+    const btnSeletorBing = body.querySelector('.nav-search-selector-bing');
+
+    const atualizarEstadoSeletor = () => {
+      if (buscadorSelecionado === 'google') {
+        btnSeletorGoogle.classList.add('active');
+        btnSeletorBing.classList.remove('active');
+      } else {
+        btnSeletorGoogle.classList.remove('active');
+        btnSeletorBing.classList.add('active');
+      }
+    };
 
     // Trocar o src do iframe existente dá dor de cabeça: `src = ''` recarrega a
     // própria página do OS, e o evento `load` dessa recarga se mistura com o do
@@ -370,14 +412,25 @@ OS.registerApp({
       }
     };
 
-    const abrirGoogleEmNovaAba = () => {
-      if (termoAtual) {
-        window.open('https://www.google.com/search?q=' + encodeURIComponent(termoAtual), '_blank');
-      }
-    };
-
     btnAbrirAbaToolbar.addEventListener('click', abrirEmNovaAba);
-    btnGoogleToolbar.addEventListener('click', abrirGoogleEmNovaAba);
+
+    btnSeletorGoogle.addEventListener('click', () => {
+      buscadorSelecionado = 'google';
+      OS.settings.set('navegador.buscador', 'google');
+      atualizarEstadoSeletor();
+      if (termoAtual) {
+        procesarEntrada(termoAtual);
+      }
+    });
+
+    btnSeletorBing.addEventListener('click', () => {
+      buscadorSelecionado = 'bing';
+      OS.settings.set('navegador.buscador', 'bing');
+      atualizarEstadoSeletor();
+      if (termoAtual) {
+        procesarEntrada(termoAtual);
+      }
+    });
 
     const procesarEntrada = (entrada) => {
       entrada = entrada.trim();
@@ -391,7 +444,11 @@ OS.registerApp({
         url = 'https://' + entrada;
       } else {
         termoAtual = entrada;
-        url = 'https://www.bing.com/search?q=' + encodeURIComponent(entrada);
+        if (buscadorSelecionado === 'google') {
+          url = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(entrada);
+        } else {
+          url = 'https://www.bing.com/search?q=' + encodeURIComponent(entrada);
+        }
       }
 
       if (historico[indiceHistorico] !== url) {
@@ -459,6 +516,7 @@ OS.registerApp({
       });
     });
 
+    atualizarEstadoSeletor();
     divHome.classList.remove('hidden');
   }
 });
