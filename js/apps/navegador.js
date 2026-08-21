@@ -9,6 +9,7 @@ OS.registerApp({
     const historico = OS.settings.get('navegador:historico', []);
     let indiceHistorico = historico.length - 1;
     let urlAtual = '';
+    let termoAtual = '';
 
     body.innerHTML = `
       <style scoped>
@@ -160,6 +161,13 @@ OS.registerApp({
           background: #0052a3;
         }
 
+        .nav-help-text {
+          font-size: 12px;
+          color: #666;
+          margin-bottom: 24px;
+          line-height: 1.4;
+        }
+
         .nav-shortcuts {
           display: grid;
           grid-template-columns: repeat(4, 80px);
@@ -243,6 +251,7 @@ OS.registerApp({
           <input class="nav-address" type="text" placeholder="Digite uma URL ou faça uma busca">
           <button class="nav-search-btn">Buscar</button>
           <div class="nav-spacer"></div>
+          <button class="nav-open-external-btn nav-toolbar-google" title="Buscar no Google em nova aba">Google</button>
           <button class="nav-open-external-btn nav-toolbar-open-external" title="Abrir em nova aba">Abrir em nova aba</button>
         </div>
         <div class="nav-content">
@@ -252,6 +261,7 @@ OS.registerApp({
               <input class="nav-search-input" type="text" placeholder="Pesquise na web...">
               <button class="nav-home-search-btn">Buscar</button>
             </div>
+            <p class="nav-help-text">Busca dentro da janela usa Bing. Use o botão Google para buscar no Google.</p>
             <div class="nav-shortcuts">
               <a class="nav-shortcut" href="https://www.google.com">
                 <span class="icon">🔍</span><span class="label">Google</span>
@@ -289,6 +299,7 @@ OS.registerApp({
     const divErro = body.querySelector('.nav-error');
     const btnAbrirAba = body.querySelector('.nav-open-external');
     const btnAbrirAbaToolbar = body.querySelector('.nav-toolbar-open-external');
+    const btnGoogleToolbar = body.querySelector('.nav-toolbar-google');
     const inputBuscaHome = body.querySelector('.nav-search-input');
     const btnBuscaHome = body.querySelector('.nav-home-search-btn');
 
@@ -359,7 +370,14 @@ OS.registerApp({
       }
     };
 
+    const abrirGoogleEmNovaAba = () => {
+      if (termoAtual) {
+        window.open('https://www.google.com/search?q=' + encodeURIComponent(termoAtual), '_blank');
+      }
+    };
+
     btnAbrirAbaToolbar.addEventListener('click', abrirEmNovaAba);
+    btnGoogleToolbar.addEventListener('click', abrirGoogleEmNovaAba);
 
     const procesarEntrada = (entrada) => {
       entrada = entrada.trim();
@@ -372,7 +390,8 @@ OS.registerApp({
       } else if (entrada.includes('.')) {
         url = 'https://' + entrada;
       } else {
-        url = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(entrada);
+        termoAtual = entrada;
+        url = 'https://www.bing.com/search?q=' + encodeURIComponent(entrada);
       }
 
       if (historico[indiceHistorico] !== url) {
