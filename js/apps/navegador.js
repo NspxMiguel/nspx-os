@@ -313,8 +313,9 @@ OS.registerApp({
 
       const novoIframe = document.createElement('iframe');
       novoIframe.className = iframe.className;
-      novoIframe.setAttribute('sandbox',
-        'allow-scripts allow-same-origin allow-forms allow-popups');
+      // Sem sandbox: o Google (e qualquer site sério) precisa de cookies e
+      // navegação próprios para renderizar, e o iframe já é outra origem.
+      novoIframe.setAttribute('referrerpolicy', 'no-referrer');
 
       // Não dá para ler o conteúdo de outra origem — tentar isso só levanta um
       // SecurityError que acontece igual quando a página carregou bem. O único
